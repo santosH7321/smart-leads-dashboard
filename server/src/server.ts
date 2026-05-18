@@ -5,8 +5,13 @@ import { connectDB } from './config/db';
 connectDB();
 
 import express from 'express';
+import { AuthRouter } from './routes/user.route';
 
 const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use("/auth", AuthRouter);
 const PORT = process.env.PORT || 4000;
 
 app.get('/', (req, res) => {

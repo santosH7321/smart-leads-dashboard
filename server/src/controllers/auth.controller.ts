@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { CatchError, TryError } from "../utils/error";
 import User from "../models/user.model";
 import bcrypt from "bcryptjs";
+import { generateAccessToken, generateRefreshToken } from "../utils/generateToken";
 
 export const Signup = async (req: Request, res: Response) => {
     try {
@@ -20,9 +21,31 @@ export const Signup = async (req: Request, res: Response) => {
 
         const user = await User.create({ name, email, password, role });
 
+        const accessToken = generateAccessToken({
+            userId: user._id.toString(),
+            role: user.role,
+        });
+
+        const refreshToken = generateRefreshToken({
+            userId: user._id.toString(),
+            role: user.role,
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
         const hidePassword = await User.findById(user._id).select("-password");
 
-        res.status(201).json({ message: "User created successfully", user: hidePassword });
+        res.status(201).json({
+            success: true,
+            message: "User created successfully",
+            accessToken,
+            user: hidePassword,
+        });
     }
     catch(error: unknown) {
         CatchError(error, res, "Signup failed please try after sometime")
@@ -50,9 +73,32 @@ export const Login = async (req: Request, res: Response) => {
             throw TryError("Invalid email or password", 400);
         }
 
+        const accessToken = generateAccessToken({
+            userId: user._id.toString(),
+            role: user.role,
+        });
+
+        const refreshToken = generateRefreshToken({
+            userId: user._id.toString(),
+            role: user.role,
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+
         const hidePassword = await User.findById(user._id).select("-password");
 
-        res.status(200).json({ message: "Login successful", user: hidePassword });
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            accessToken,
+            user: hidePassword,
+        });
     }
     catch(error: unknown) {
         CatchError(error, res, "Login failed please try after sometime")

@@ -5,12 +5,14 @@ import { connectDB } from './config/db';
 connectDB();
 
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { AuthRouter } from './routes/user.route';
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use("/auth", AuthRouter);
 const PORT = process.env.PORT || 4000;
 

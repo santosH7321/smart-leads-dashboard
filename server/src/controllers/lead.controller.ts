@@ -108,3 +108,24 @@ export const getAllLeads = async ( req: Request, res: Response ) => {
     });
   }
 };
+
+export const getSingleLead = async ( req: Request, res: Response ) => {
+  try {
+    const lead = await Lead.findById(req.params.id);
+
+    if (!lead) {
+      return res.status(404).json({
+        message: "Lead not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      lead,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to fetch lead",
+    });
+  }
+};

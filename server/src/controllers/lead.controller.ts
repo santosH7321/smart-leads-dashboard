@@ -129,3 +129,25 @@ export const getSingleLead = async ( req: Request, res: Response ) => {
     });
   }
 };
+
+export const updateLead = async ( req: Request, res: Response ) => {
+  try {
+    const lead = await Lead.findByIdAndUpdate( req.params.id, req.body, { new: true });
+
+    if (!lead) {
+      return res.status(404).json({
+        message: "Lead not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Lead updated successfully",
+      lead,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to update lead",
+    });
+  }
+};

@@ -7,13 +7,17 @@ connectDB();
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { AuthRouter } from './routes/user.route';
+import { LeadRouter } from './routes/lead.routes';
 
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
 app.use("/auth", AuthRouter);
+app.use("/lead", LeadRouter);
+
 const PORT = process.env.PORT || 4000;
 
 app.get('/', (req, res) => {

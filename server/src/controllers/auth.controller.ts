@@ -3,6 +3,7 @@ import { CatchError, TryError } from "../utils/error";
 import User from "../models/user.model";
 import bcrypt from "bcryptjs";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateToken";
+import jwt from "jsonwebtoken";
 
 export const Signup = async (req: Request, res: Response) => {
     try {
@@ -104,3 +105,37 @@ export const Login = async (req: Request, res: Response) => {
         CatchError(error, res, "Login failed please try after sometime")
     }
 }
+
+export const RefreshToken = async ( req: Request, res: Response ) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({
+        message: "Refresh token missing",
+      });
+    }
+
+    const decoded = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET!
+    ) as {
+      userId: string;
+      role: string;
+    };
+
+    const accessToken = generateAccessToken({
+      userId: decoded.userId,
+      role: decoded.role,
+    });
+
+    res.status(200).json({
+      success: true,
+      accessToken,
+    });
+  } catch (error) {
+    res.status(401).json({
+      message: "Invalid refresh token",
+    });
+  }
+};

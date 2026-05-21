@@ -41,7 +41,6 @@ const Signup = () => {
     try {
       setLoading(true);
 
-      // API CALL HERE
       console.log("Signup Data:", formData);
 
       await new Promise((resolve) =>
